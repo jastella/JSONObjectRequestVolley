@@ -50,61 +50,47 @@ public class MainActivity extends AppCompatActivity {
              {
                try
                 {
-                    RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
                     String url = "http://www.fabricaweb.es/ws/userGetLogin.php";
-                    /*StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
-                        @Override
-                        public void onResponse(String response) {
-                            textView.setText(""+response);
-                        }
-                    }, new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            Toast.makeText(getApplicationContext(),"SERVER CONNECTION ERROR"+error.getMessage(),Toast.LENGTH_LONG).show();
-                        }
-                    });
-
-                    queue.add(stringRequest);
-                    */
 
                     HashMap<String, String> params = new HashMap<>();
                     params.put("phone", username);
                     params.put("password", password);
 
-                    //Toast.makeText(getApplicationContext(),params.toString(), Toast.LENGTH_SHORT).show();
+                    RequestQueue requestQueue = Volley.newRequestQueue(MainActivity.this);
 
-                    JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, new JSONObject(params),
-                            new Response.Listener<JSONObject>() {
-                                @Override
-                                public void onResponse(JSONObject responseJsonObject) {
-                                    textView.setText((responseJsonObject).toString());
-                                }
-                            },
-                            new Response.ErrorListener() {
+                    CustomRequest jsObjRequest = new CustomRequest(Request.Method.POST,
+                            url, params, this.createRequestSuccessListener(), this.createRequestErrorListener());
 
-                            @Override
-                            public void onErrorResponse(VolleyError volleyError) {
-                                Log.d("Volley Error", volleyError.toString());
-                                Toast.makeText(getApplicationContext(), "Connectivity Error",
-                                        Toast.LENGTH_SHORT).show();
-                            }
-                    }){
-                        @Override
-                        public String getBodyContentType() {
-                            return "application/json; charset=utf-8";
-                        }
-                    };
-
-                    queue.add(request);
-
-                    queue.start();
-
+                    requestQueue.add(jsObjRequest);
                 }
                 catch (Exception e)
                 {
-textView.setText(e.toString());
+            textView.setText(e.toString());
                 }
              }
+            }
+
+            private Response.ErrorListener createRequestErrorListener() {
+
+                return new Response.ErrorListener(){
+
+                    @Override
+                    public void onErrorResponse(VolleyError error){
+                        Toast.makeText(getApplicationContext(), "Connectivity Error",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                };
+            }
+
+            private Response.Listener<JSONObject> createRequestSuccessListener() {
+                    return new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            Toast.makeText(getApplicationContext(), response.toString(),
+                                    Toast.LENGTH_SHORT).show();
+
+                        }
+                    };
             }
         });
 
