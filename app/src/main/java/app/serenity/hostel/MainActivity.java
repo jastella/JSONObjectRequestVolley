@@ -9,6 +9,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -20,6 +21,7 @@ import com.android.volley.toolbox.Volley;
 import org.json.JSONObject;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -42,14 +44,14 @@ public class MainActivity extends AppCompatActivity {
              password = editText2.getText().toString();
              if(username.isEmpty() || password.isEmpty())
              {
-                 Toast.makeText(getApplicationContext(),"Please Enter Your Login Details",Toast.LENGTH_LONG).show();
+                 Toast.makeText(getApplicationContext(),"Ingrese los datos.",Toast.LENGTH_LONG).show();
              }
              else
              {
                try
                 {
                     RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
-                    String url = "http://www.polazo.com/test/response.php";
+                    String url = "http://www.fabricaweb.es/ws/userGetLogin.php";
                     /*StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
@@ -64,27 +66,34 @@ public class MainActivity extends AppCompatActivity {
 
                     queue.add(stringRequest);
                     */
-                    HashMap<String, String> params = new HashMap<String, String>();
 
-                    params.put("user_name", username);
-                    params.put("password",password);
-                    JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST,url, new JSONObject(params),
+                    HashMap<String, String> params = new HashMap<>();
+                    params.put("phone", username);
+                    params.put("password", password);
+
+                    //Toast.makeText(getApplicationContext(),params.toString(), Toast.LENGTH_SHORT).show();
+
+                    JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, new JSONObject(params),
                             new Response.Listener<JSONObject>() {
-
                                 @Override
                                 public void onResponse(JSONObject responseJsonObject) {
                                     textView.setText((responseJsonObject).toString());
                                 }
-                            }, new Response.ErrorListener() {
+                            },
+                            new Response.ErrorListener() {
 
+                            @Override
+                            public void onErrorResponse(VolleyError volleyError) {
+                                Log.d("Volley Error", volleyError.toString());
+                                Toast.makeText(getApplicationContext(), "Connectivity Error",
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                    }){
                         @Override
-                        public void onErrorResponse(VolleyError volleyError) {
-
-                            Log.d("Volley Error", volleyError.toString());
-                            Toast.makeText(getApplicationContext(), "Connectivity Error",
-                                    Toast.LENGTH_SHORT).show();
+                        public String getBodyContentType() {
+                            return "application/json; charset=utf-8";
                         }
-                    });
+                    };
 
                     queue.add(request);
 
